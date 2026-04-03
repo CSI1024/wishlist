@@ -946,6 +946,17 @@
       <div id="apiKeyStatus" style="font-size:12px;margin-top:8px;color:var(--muted);"></div>
     </div>
 
+    <div class="bookmarklet-box" id="screenshotKeyBox">
+      <h3>📸 Screenshotone API Key</h3>
+      <p>Used to automatically capture product images. Free tier = 100 screenshots/month. Get your key at <strong>screenshotone.com</strong> → Dashboard.</p>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <input type="password" id="screenshotKeyInput" placeholder="Your access key…" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--warm-white);color:var(--ink);outline:none;">
+        <button class="btn btn-primary" onclick="saveScreenshotKey()">Save</button>
+      </div>
+      <div id="screenshotKeyStatus" style="font-size:12px;margin-top:8px;color:var(--muted);"></div>
+      <div id="screenshotUsage" style="font-size:12px;margin-top:6px;color:var(--muted);"></div>
+    </div>
+
     <div class="bookmarklet-box">
       <h3>🔖 Desktop bookmarklet</h3>
       <p>Drag this button to your bookmarks bar. Then on any product page, click it — your wishlist will open with the URL pre-filled and ready to save.</p>
@@ -995,7 +1006,7 @@
     <div class="form-row">
       <div class="field">
         <label>Item name</label>
-        <input type="text" id="fieldName" placeholder="e.g. Cropped Cardigan">
+        <input type="text" id="fieldName" placeholder="e.g. Cropped Cardigan" oninput="inferFromName()">
       </div>
       <div class="field">
         <label>Price</label>
@@ -1007,7 +1018,7 @@
     <div class="form-row">
       <div class="field">
         <label>Category</label>
-        <select id="fieldCategory">
+        <select id="fieldCategory" onchange="inferSubcategory()">
           <option value="">Select…</option>
           <option>Clothing</option>
           <option>Shoes</option>
@@ -1019,6 +1030,14 @@
           <option>Other</option>
         </select>
       </div>
+      <div class="field">
+        <label>Subcategory <span style="font-weight:400;text-transform:none;font-size:10px;">(optional)</span></label>
+        <input type="text" id="fieldSubcategory" placeholder="e.g. Cardigan, Dress, Sneaker">
+      </div>
+    </div>
+
+    <!-- COLOR -->
+    <div class="form-row single">
       <div class="field">
         <label>Color</label>
         <input type="text" id="fieldColor" placeholder="e.g. Beige">
@@ -1220,6 +1239,7 @@ function cardHTML(item, bought=false) {
       <div class="card-site">
         ${favicon ? `<img class="site-favicon" src="${favicon}" alt="" onerror="this.style.display='none'">` : ''}
         <span class="site-name">${item.site || getDomain(item.url) || '—'}</span>
+        ${item.subcategory ? `<span style="color:var(--accent);font-size:11px;font-weight:500;">· ${item.subcategory}</span>` : ''}
       </div>
       <div class="card-name">${item.name || 'Untitled item'}</div>
       <div class="card-meta">
@@ -1248,8 +1268,8 @@ function compareCardHTML(item) {
       <div class="compare-site">
         ${favicon ? `<img class="site-favicon" src="${favicon}" alt="" onerror="this.style.display='none'">` : ''}
         <span class="site-name">${item.site || getDomain(item.url) || '—'}</span>
+        ${item.subcategory ? `<span style="color:var(--accent);font-size:11px;font-weight:500;">· ${item.subcategory}</span>` : ''}
       </div>
-      <div class="compare-name">${item.name || 'Untitled'}</div>
       <div class="compare-price">${item.price || '—'}</div>
       ${item.color ? `<div class="compare-detail">🎨 ${item.color}</div>` : ''}
       ${item.notes ? `<div class="compare-note">${item.notes}</div>` : ''}
@@ -1287,6 +1307,7 @@ function editItem(id) {
   document.getElementById('fieldGroup').value = item.group || '';
   document.getElementById('fieldSite').value = item.site || '';
   document.getElementById('fieldNotes').value = item.notes || '';
+  document.getElementById('fieldSubcategory').value = item.subcategory || '';
   setPriority(item.priority || 'maybe');
   if (item.image) {
     document.getElementById('previewImg').src = item.image;
@@ -1296,7 +1317,7 @@ function editItem(id) {
 }
 
 function clearForm() {
-  ['urlInput','fieldName','fieldPrice','fieldColor','fieldGroup','fieldSite','fieldNotes'].forEach(id => document.getElementById(id).value='');
+  ['urlInput','fieldName','fieldPrice','fieldColor','fieldGroup','fieldSite','fieldNotes','fieldSubcategory'].forEach(id => document.getElementById(id).value='');
   document.getElementById('fieldCategory').value = '';
   document.getElementById('previewWrap').style.display = 'none';
   document.getElementById('previewImg').src = '';
@@ -1339,74 +1360,120 @@ async function fetchProductInfo() {
   const btn = document.getElementById('fetchBtn');
   const status = document.getElementById('fetchStatus');
   btn.disabled = true;
-  status.innerHTML = '<span class="spinner"></span> Fetching product details…';
 
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    status.innerHTML = '⚠ No API key — add it in the Setup tab';
+    status.style.color = 'var(--love)';
+    btn.disabled = false;
+    return;
+  }
+
+  // ── STEP 1: Try to fetch actual page content ──
+  let pageContent = null;
+  status.innerHTML = '<span class="spinner"></span> Reading product page…';
   try {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      status.innerHTML = '⚠ No API key — add it in the Setup tab';
-      status.style.color = 'var(--love)';
-      btn.disabled = false;
-      return;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const proxyRes = await fetch(proxyUrl);
+    const proxyData = await proxyRes.json();
+    if (proxyData?.contents) {
+      // Strip HTML tags to get readable text, limit to 4000 chars
+      const text = proxyData.contents.replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,4000);
+      if (text.length > 200) pageContent = text;
     }
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{
-          role: "user",
-          content: `You are a shopping assistant. Given this product URL, extract product details. Return ONLY valid JSON with these exact keys (use null for anything you can't determine):
+  } catch { /* fall through to URL-only */ }
+
+  // ── STEP 2: Ask Claude to extract info ──
+  status.innerHTML = '<span class="spinner"></span> Extracting product details…';
+  try {
+    const prompt = pageContent
+      ? `You are a shopping assistant. Extract product details from this page content and URL. Return ONLY valid JSON with no preamble:
 {
   "name": "product name",
   "price": "price with currency symbol e.g. $49",
   "color": "color(s) e.g. Beige, Navy",
   "category": one of: "Clothing","Shoes","Accessories","Bags","Home","Beauty","Tech","Other",
-  "item_type": "specific item type e.g. Cropped Cardigan, Ankle Boot, Tote Bag",
+  "subcategory": "specific item type e.g. Cardigan, Ankle Boot, Tote Bag, Dress",
   "site": "retailer name e.g. Zara, Aritzia",
-  "image_url": "direct URL to main product image if identifiable from the URL pattern, else null",
-  "description": "one short sentence about the item"
+  "image_url": "direct URL to the main product image found in the page content, else null"
 }
 
-Product URL: ${url}
+URL: ${url}
 
-IMPORTANT: Return ONLY the JSON object, no other text.`
-        }]
-      })
+PAGE CONTENT:
+${pageContent}`
+      : `You are a shopping assistant. Given this product URL, infer product details. Return ONLY valid JSON with no preamble:
+{
+  "name": "product name",
+  "price": "price with currency symbol if determinable, else null",
+  "color": "color if determinable from URL, else null",
+  "category": one of: "Clothing","Shoes","Accessories","Bags","Home","Beauty","Tech","Other",
+  "subcategory": "specific item type e.g. Cardigan, Ankle Boot, Tote Bag, Dress",
+  "site": "retailer name e.g. Zara, Aritzia",
+  "image_url": null
+}
+
+URL: ${url}`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: prompt }] })
     });
 
     const data = await response.json();
     const text = data.content?.find(b => b.type === 'text')?.text || '';
     let info = {};
-    try {
-      const clean = text.replace(/```json|```/g,'').trim();
-      info = JSON.parse(clean);
-    } catch { /* partial fill */ }
+    try { info = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch {}
 
-    if (info.name) document.getElementById('fieldName').value = info.name + (info.item_type && !info.name.toLowerCase().includes(info.item_type.toLowerCase()) ? '' : '');
+    if (info.name) document.getElementById('fieldName').value = info.name;
     if (info.price) document.getElementById('fieldPrice').value = info.price;
     if (info.color) document.getElementById('fieldColor').value = info.color;
     if (info.category) document.getElementById('fieldCategory').value = info.category;
+    if (info.subcategory) document.getElementById('fieldSubcategory').value = info.subcategory;
     if (info.site) document.getElementById('fieldSite').value = info.site;
-    if (info.item_type && !document.getElementById('fieldName').value) document.getElementById('fieldName').value = info.item_type;
 
-    // Try to load image
-    if (info.image_url) {
-      const img = document.getElementById('previewImg');
-      img.src = info.image_url;
-      img.onload = () => { document.getElementById('previewWrap').style.display='flex'; };
-      img.onerror = () => { document.getElementById('previewWrap').style.display='none'; };
-    }
-
-    // Auto-suggest group based on item_type
-    if (info.item_type && !document.getElementById('fieldGroup').value) {
+    // Auto-suggest group
+    const subcat = info.subcategory || '';
+    if (subcat && !document.getElementById('fieldGroup').value) {
       const existing = [...new Set(items.map(i => i.group).filter(Boolean))];
-      const match = existing.find(g => g.toLowerCase().includes((info.item_type||'').toLowerCase()) || (info.item_type||'').toLowerCase().includes(g.toLowerCase()));
+      const match = existing.find(g => g.toLowerCase().includes(subcat.toLowerCase()) || subcat.toLowerCase().includes(g.toLowerCase()));
       if (match) document.getElementById('fieldGroup').value = match;
     }
 
-    status.innerHTML = '✓ Details filled in — review and save';
+    // ── STEP 3: Try direct image URL first ──
+    if (info.image_url) {
+      status.innerHTML = '<span class="spinner"></span> Loading image…';
+      const loaded = await tryLoadImage(info.image_url);
+      if (loaded) {
+        document.getElementById('previewImg').src = info.image_url;
+        document.getElementById('previewWrap').style.display = 'flex';
+        status.innerHTML = `✓ Details filled in${pageContent ? ' (from page)' : ' (from URL)'} — review and save`;
+        status.style.color = 'var(--maybe)';
+        btn.disabled = false;
+        return;
+      }
+    }
+
+    // ── STEP 4: Fall back to Screenshotone ──
+    const ssKey = getScreenshotKey();
+    const ssUsage = getScreenshotUsage();
+    if (ssKey && ssUsage.count < 100) {
+      status.innerHTML = '<span class="spinner"></span> Capturing product image…';
+      const ssUrl = `https://api.screenshotone.com/take?access_key=${ssKey}&url=${encodeURIComponent(url)}&viewport_width=1200&viewport_height=800&device_scale_factor=1&format=jpg&image_quality=80&block_ads=true&block_cookie_banners=true&block_trackers=true&full_page=false&selector=img[src*="product"],img[class*="product"],img[id*="product"],.product-image img,main img&timeout=15`;
+      incrementScreenshotUsage();
+      const ssLoaded = await tryLoadImage(ssUrl);
+      if (ssLoaded) {
+        document.getElementById('previewImg').src = ssUrl;
+        document.getElementById('previewWrap').style.display = 'flex';
+      }
+      updateScreenshotUsageDisplay();
+    } else if (ssKey && ssUsage.count >= 100) {
+      status.innerHTML = '⚠ Screenshot limit reached for this month — resets on the 1st';
+      status.style.color = 'var(--love)';
+    }
+
+    status.innerHTML = `✓ Details filled in${pageContent ? ' (from page)' : ' (from URL)'} — review and save`;
     status.style.color = 'var(--maybe)';
 
   } catch (err) {
@@ -1415,6 +1482,39 @@ IMPORTANT: Return ONLY the JSON object, no other text.`
   }
 
   btn.disabled = false;
+}
+
+function tryLoadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = src;
+    setTimeout(() => resolve(false), 5000);
+  });
+}
+
+// ── CATEGORY INFERENCE FROM NAME ──
+function inferFromName() {
+  const name = document.getElementById('fieldName').value.trim().toLowerCase();
+  if (!name) return;
+  const catMap = [
+    { cat: 'Clothing', subs: ['dress','cardigan','sweater','shirt','blouse','jacket','coat','jeans','pants','trousers','skirt','top','tee','hoodie','blazer','shorts','leggings','jumpsuit','romper','vest','knitwear','knit'] },
+    { cat: 'Shoes', subs: ['sneaker','boot','heel','flat','sandal','loafer','mule','pump','oxford','slipper','clog','wedge'] },
+    { cat: 'Bags', subs: ['bag','tote','clutch','purse','backpack','crossbody','satchel','wallet','pouch'] },
+    { cat: 'Accessories', subs: ['necklace','earring','bracelet','ring','watch','belt','scarf','hat','cap','sunglasses','glasses'] },
+    { cat: 'Beauty', subs: ['serum','moisturizer','lipstick','mascara','foundation','perfume','cream','oil','cleanser','toner','mask'] },
+    { cat: 'Home', subs: ['candle','pillow','throw','blanket','vase','lamp','rug','frame','bowl','mug','plate'] },
+    { cat: 'Tech', subs: ['phone','laptop','headphone','airpod','charger','cable','keyboard','mouse','tablet','watch'] },
+  ];
+  for (const { cat, subs } of catMap) {
+    const match = subs.find(s => name.includes(s));
+    if (match) {
+      if (!document.getElementById('fieldCategory').value) document.getElementById('fieldCategory').value = cat;
+      if (!document.getElementById('fieldSubcategory').value) document.getElementById('fieldSubcategory').value = match.charAt(0).toUpperCase() + match.slice(1);
+      return;
+    }
+  }
 }
 
 // ── GROUP AUTOCOMPLETE ──
@@ -1464,6 +1564,53 @@ function toast(msg) {
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── SCREENSHOT KEY ──
+function saveScreenshotKey() {
+  const key = document.getElementById('screenshotKeyInput').value.trim();
+  if (!key) { toast('Please enter a key'); return; }
+  localStorage.setItem('wishlist_ss_key', key);
+  document.getElementById('screenshotKeyInput').value = '';
+  showScreenshotKeyStatus();
+  toast('Screenshotone key saved ✓');
+}
+
+function getScreenshotKey() { return localStorage.getItem('wishlist_ss_key') || ''; }
+
+function showScreenshotKeyStatus() {
+  const key = getScreenshotKey();
+  const el = document.getElementById('screenshotKeyStatus');
+  if (!el) return;
+  el.innerHTML = key ? '✓ Key saved — ends in …' + key.slice(-4) : 'No key saved yet';
+  el.style.color = key ? 'var(--maybe)' : 'var(--muted)';
+  updateScreenshotUsageDisplay();
+}
+
+function getScreenshotUsage() {
+  const stored = JSON.parse(localStorage.getItem('wishlist_ss_usage') || '{}');
+  const month = new Date().toISOString().slice(0,7);
+  if (stored.month !== month) return { month, count: 0 };
+  return stored;
+}
+
+function incrementScreenshotUsage() {
+  const usage = getScreenshotUsage();
+  usage.count = (usage.count || 0) + 1;
+  localStorage.setItem('wishlist_ss_usage', JSON.stringify(usage));
+}
+
+function updateScreenshotUsageDisplay() {
+  const el = document.getElementById('screenshotUsage');
+  if (!el) return;
+  const usage = getScreenshotUsage();
+  const count = usage.count || 0;
+  const remaining = 100 - count;
+  let color = 'var(--muted)';
+  if (count >= 100) color = 'var(--love)';
+  else if (count >= 80) color = 'var(--accent)';
+  el.innerHTML = `📸 ${count}/100 screenshots used this month (${remaining} remaining)`;
+  el.style.color = color;
 }
 
 // ── API KEY (still stored locally — it's a secret) ──
@@ -1533,6 +1680,7 @@ async function saveItem() {
     name,
     price: document.getElementById('fieldPrice').value.trim(),
     category: document.getElementById('fieldCategory').value,
+    subcategory: document.getElementById('fieldSubcategory').value.trim(),
     color: document.getElementById('fieldColor').value.trim(),
     group: document.getElementById('fieldGroup').value.trim(),
     site: document.getElementById('fieldSite').value.trim() || (url ? capitalize(getDomain(url).split('.')[0]) : ''),
@@ -1586,10 +1734,9 @@ async function pickThis(id) {
 // ── START ──
 init();
 showApiKeyStatus();
+showScreenshotKeyStatus();
 startSync();
 </script>
 
-</body>
-</html>
 </body>
 </html>
