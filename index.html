@@ -1395,7 +1395,8 @@ async function fetchProductInfo() {
   "category": one of: "Clothing","Shoes","Accessories","Bags","Home","Beauty","Tech","Other",
   "subcategory": "specific item type e.g. Cardigan, Ankle Boot, Tote Bag, Dress",
   "site": "retailer name e.g. Zara, Aritzia",
-  "image_url": "direct URL to the main product image found in the page content, else null"
+  "image_url": "direct URL to the main product image found in the page content, else null",
+  "image_selector": "the most specific CSS selector that targets the main product hero image on this page — e.g. '.product-image__hero img', '[data-testid=product-image] img', '.pdp-image img'. Look for the largest, most prominent product photo. Return null if unsure."
 }
 
 URL: ${url}
@@ -1410,7 +1411,8 @@ ${pageContent}`
   "category": one of: "Clothing","Shoes","Accessories","Bags","Home","Beauty","Tech","Other",
   "subcategory": "specific item type e.g. Cardigan, Ankle Boot, Tote Bag, Dress",
   "site": "retailer name e.g. Zara, Aritzia",
-  "image_url": null
+  "image_url": null,
+  "image_selector": null
 }
 
 URL: ${url}`;
@@ -1460,7 +1462,10 @@ URL: ${url}`;
     const ssUsage = getScreenshotUsage();
     if (ssKey && ssUsage.count < 100) {
       status.innerHTML = '<span class="spinner"></span> Capturing product image…';
-      const ssUrl = `https://api.screenshotone.com/take?access_key=${ssKey}&url=${encodeURIComponent(url)}&viewport_width=1200&viewport_height=800&device_scale_factor=1&format=jpg&image_quality=80&block_ads=true&block_cookie_banners=true&block_trackers=true&full_page=false&selector=img[src*="product"],img[class*="product"],img[id*="product"],.product-image img,main img&timeout=15`;
+      const selector = info.image_selector;
+      const ssUrl = selector
+        ? `https://api.screenshotone.com/take?access_key=${ssKey}&url=${encodeURIComponent(url)}&viewport_width=1280&viewport_height=900&device_scale_factor=1&format=jpg&image_quality=85&block_ads=true&block_cookie_banners=true&block_trackers=true&full_page=false&selector=${encodeURIComponent(selector)}&delay=2&timeout=20`
+        : `https://api.screenshotone.com/take?access_key=${ssKey}&url=${encodeURIComponent(url)}&viewport_width=1280&viewport_height=900&device_scale_factor=1&format=jpg&image_quality=85&block_ads=true&block_cookie_banners=true&block_trackers=true&full_page=false&clip_x=0&clip_y=60&clip_width=620&clip_height=840&delay=2&timeout=20`;
       incrementScreenshotUsage();
       const ssLoaded = await tryLoadImage(ssUrl);
       if (ssLoaded) {
