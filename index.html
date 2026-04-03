@@ -1369,14 +1369,14 @@ async function fetchProductInfo() {
     return;
   }
 
-  // ── STEP 1: Try Microlink to get price, image, name ──
+  // ── STEP 1: Try backend scraper for price, image, name, color ──
   status.innerHTML = '<span class="spinner"></span> Fetching product details…';
-  let mlData = {};
+  let scraped = {};
   try {
-    const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}&screenshot=false&meta=false&audio=false&video=false&iframe=false`);
-    const ml = await mlRes.json();
-    if (ml.status === 'success' && ml.data) {
-      mlData = ml.data;
+    const scraperRes = await fetch(`https://wishlist-scraper-3aea.onrender.com/scrape?url=${encodeURIComponent(url)}`);
+    const scraperData = await scraperRes.json();
+    if (scraperData.success && scraperData.data) {
+      scraped = scraperData.data;
     }
   } catch { /* fall through */ }
 
@@ -1410,14 +1410,15 @@ URL: ${url}`
     let info = {};
     try { info = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch {}
 
-    // Merge: Microlink wins for name/price/image if available, Claude fills the rest
-    const name = mlData.title || info.name || '';
-    const price = mlData.price?.amount ? `${mlData.price.currency || '$'}${mlData.price.amount}` : null;
-    const image = mlData.image?.url || null;
+    // Merge: scraper wins for name/price/image/color, Claude fills category/subcategory/site
+    const name = scraped.name || info.name || '';
+    const price = scraped.price || null;
+    const image = scraped.image || null;
+    const color = scraped.color && !/^\d+$/.test(scraped.color) ? scraped.color : null;
 
     if (name) document.getElementById('fieldName').value = name;
     if (price) document.getElementById('fieldPrice').value = price;
-    if (info.color) document.getElementById('fieldColor').value = info.color;
+    if (color) document.getElementById('fieldColor').value = color;
     if (info.category) document.getElementById('fieldCategory').value = info.category;
     if (info.subcategory) document.getElementById('fieldSubcategory').value = info.subcategory;
     if (info.site) document.getElementById('fieldSite').value = info.site;
@@ -1431,17 +1432,14 @@ URL: ${url}`
       if (match) document.getElementById('fieldGroup').value = match;
     }
 
-    // ── STEP 3: Try Microlink image directly ──
+    // ── STEP 3: Use scraped image if available ──
     if (image) {
-      const loaded = await tryLoadImage(image);
-      if (loaded) {
-        document.getElementById('previewImg').src = image;
-        document.getElementById('previewWrap').style.display = 'flex';
-        status.innerHTML = '✓ Details filled in — review and save';
-        status.style.color = 'var(--maybe)';
-        btn.disabled = false;
-        return;
-      }
+      document.getElementById('previewImg').src = image;
+      document.getElementById('previewWrap').style.display = 'flex';
+      status.innerHTML = '✓ Details filled in — review and save';
+      status.style.color = 'var(--maybe)';
+      btn.disabled = false;
+      return;
     }
 
     // ── STEP 4: Fall back to Screenshotone ──
