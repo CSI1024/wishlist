@@ -1373,12 +1373,11 @@ async function fetchProductInfo() {
   let pageContent = null;
   status.innerHTML = '<span class="spinner"></span> Reading product page…';
   try {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
     const proxyRes = await fetch(proxyUrl);
-    const proxyData = await proxyRes.json();
-    if (proxyData?.contents) {
-      // Strip HTML tags to get readable text, limit to 4000 chars
-      const text = proxyData.contents.replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,4000);
+    const html = await proxyRes.text();
+    if (html) {
+      const text = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,4000);
       if (text.length > 200) pageContent = text;
     }
   } catch { /* fall through to URL-only */ }
