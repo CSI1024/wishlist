@@ -1070,8 +1070,11 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
-// ── STATE ──
 let items = JSON.parse(localStorage.getItem('wishlist_items') || '[]');
 let editingId = null;
 let selectedPriority = 'maybe';
@@ -1254,32 +1257,6 @@ function compareCardHTML(item) {
       ${item.url ? `<button class="compare-visit-btn" onclick="window.open('${item.url}','_blank')">Visit site →</button>` : ''}
     </div>
   </div>`;
-}
-
-// ── ACTIONS ──
-function markBought(id) {
-  items = items.map(i => i.id===id ? {...i, purchased:true} : i);
-  save(); renderAll(); toast('Marked as purchased ✓');
-}
-function unmarkBought(id) {
-  items = items.map(i => i.id===id ? {...i, purchased:false} : i);
-  save(); renderBought(); toast('Moved back to wishlist');
-}
-function deleteItem(id) {
-  if (!confirm('Delete this item?')) return;
-  items = items.filter(i => i.id !== id);
-  save(); renderAll(); renderGroups(); renderBought(); toast('Deleted');
-}
-function pickThis(id) {
-  const item = items.find(i => i.id===id);
-  if (!item || !item.group) return;
-  if (!confirm(`Pick "${item.name}" and archive the others in this group?`)) return;
-  items = items.map(i => {
-    if (i.group === item.group && i.id !== id) return {...i, purchased:true};
-    if (i.id === id) return {...i, purchased:true};
-    return i;
-  });
-  save(); renderGroups(); renderBought(); toast('Great pick! Others archived ✓');
 }
 
 // ── ADD MODAL ──
@@ -1469,48 +1446,15 @@ function setPriority(p) {
   });
 }
 
-// ── SAVE ──
-function saveItem() {
-  const name = document.getElementById('fieldName').value.trim();
-  if (!name) { toast('Please add a name for this item'); return; }
-  const url = document.getElementById('urlInput').value.trim();
-  const imgSrc = document.getElementById('previewImg').src;
-  const image = imgSrc && imgSrc !== window.location.href ? imgSrc : '';
-
-  const item = {
-    id: editingId || Date.now().toString(),
-    url,
-    name,
-    price: document.getElementById('fieldPrice').value.trim(),
-    category: document.getElementById('fieldCategory').value,
-    color: document.getElementById('fieldColor').value.trim(),
-    group: document.getElementById('fieldGroup').value.trim(),
-    site: document.getElementById('fieldSite').value.trim() || (url ? capitalize(getDomain(url).split('.')[0]) : ''),
-    notes: document.getElementById('fieldNotes').value.trim(),
-    priority: selectedPriority,
-    image,
-    purchased: false,
-    addedAt: editingId ? (items.find(i=>i.id===editingId)?.addedAt || Date.now()) : Date.now()
-  };
-
-  if (editingId) {
-    items = items.map(i => i.id===editingId ? item : i);
-    toast('Updated ✓');
-  } else {
-    items = [item, ...items];
-    toast('Added to wishlist ✓');
-  }
-
-  save(); closeModal(); renderAll(); renderGroups(); renderBought();
-}
-
 // ── UTILS ──
-function save() { localStorage.setItem('wishlist_items', JSON.stringify(items)); }
 function getDomain(url) { try { return new URL(url).hostname.replace('www.',''); } catch { return ''; } }
 function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-function clearAll() {
+async function clearAll() {
   if (!confirm('Delete ALL items? This cannot be undone.')) return;
-  items = []; save(); renderAll(); renderGroups(); renderBought(); toast('All cleared');
+  const batch = db.batch();
+  items.forEach(i => batch.delete(db.collection('items').doc(i.id)));
+  await batch.commit();
+  items = []; renderAll(); renderGroups(); renderBought(); toast('All cleared');
 }
 
 let toastTimer;
@@ -1522,7 +1466,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-// ── API KEY ──
+// ── API KEY (still stored locally — it's a secret) ──
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
   if (!key.startsWith('sk-ant-')) { toast('That doesn\'t look right — should start with sk-ant-'); return; }
@@ -1549,9 +1493,103 @@ function getApiKey() {
   return localStorage.getItem('wishlist_api_key') || '';
 }
 
+// ── FIREBASE ──
+const firebaseConfig = {
+  apiKey: "AIzaSyB5T1CylcMy6m6epq6BGgfFEiLAiP9OC3g",
+  authDomain: "wishlist-358e3.firebaseapp.com",
+  projectId: "wishlist-358e3",
+  storageBucket: "wishlist-358e3.firebasestorage.app",
+  messagingSenderId: "491239855072",
+  appId: "1:491239855072:web:ada1182a979977e2a25185"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const itemsCol = db.collection('items');
+
+// Listen for real-time updates
+function startSync() {
+  itemsCol.orderBy('addedAt', 'desc').onSnapshot(snapshot => {
+    items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderAll();
+    renderGroups();
+    renderBought();
+  }, err => {
+    console.error('Firestore error:', err);
+    toast('Sync error — check connection');
+  });
+}
+
+// Save item to Firestore
+async function saveItem() {
+  const name = document.getElementById('fieldName').value.trim();
+  if (!name) { toast('Please add a name for this item'); return; }
+  const url = document.getElementById('urlInput').value.trim();
+  const imgSrc = document.getElementById('previewImg').src;
+  const image = imgSrc && imgSrc !== window.location.href ? imgSrc : '';
+
+  const item = {
+    url,
+    name,
+    price: document.getElementById('fieldPrice').value.trim(),
+    category: document.getElementById('fieldCategory').value,
+    color: document.getElementById('fieldColor').value.trim(),
+    group: document.getElementById('fieldGroup').value.trim(),
+    site: document.getElementById('fieldSite').value.trim() || (url ? capitalize(getDomain(url).split('.')[0]) : ''),
+    notes: document.getElementById('fieldNotes').value.trim(),
+    priority: selectedPriority,
+    image,
+    purchased: false,
+    addedAt: editingId ? (items.find(i=>i.id===editingId)?.addedAt || Date.now()) : Date.now()
+  };
+
+  try {
+    if (editingId) {
+      await itemsCol.doc(editingId).set(item);
+      toast('Updated ✓');
+    } else {
+      await itemsCol.add(item);
+      toast('Added to wishlist ✓');
+    }
+    closeModal();
+  } catch(e) {
+    toast('Error saving — try again');
+    console.error(e);
+  }
+}
+
+async function markBought(id) {
+  await itemsCol.doc(id).update({ purchased: true });
+  toast('Marked as purchased ✓');
+}
+async function unmarkBought(id) {
+  await itemsCol.doc(id).update({ purchased: false });
+  toast('Moved back to wishlist');
+}
+async function deleteItem(id) {
+  if (!confirm('Delete this item?')) return;
+  await itemsCol.doc(id).delete();
+  toast('Deleted');
+}
+async function pickThis(id) {
+  const item = items.find(i => i.id===id);
+  if (!item || !item.group) return;
+  if (!confirm(`Pick "${item.name}" and archive the others in this group?`)) return;
+  const batch = db.batch();
+  items.filter(i => i.group === item.group).forEach(i => {
+    batch.update(itemsCol.doc(i.id), { purchased: true });
+  });
+  await batch.commit();
+  toast('Great pick! Others archived ✓');
+}
+
 // ── START ──
 init();
 showApiKeyStatus();
+startSync();
 </script>
+
+</body>
+</html>
 </body>
 </html>
