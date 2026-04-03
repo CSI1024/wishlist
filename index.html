@@ -1419,7 +1419,7 @@ URL: ${url}`
     if (ssKey && ssUsage.count < 100) {
       status.innerHTML = '<span class="spinner"></span> Capturing page screenshot…';
       // Full page screenshot cropped to top portion where product image + price live
-      const ssUrl = `https://api.screenshotone.com/take?access_key=${ssKey}&url=${encodeURIComponent(url)}&viewport_width=1280&viewport_height=900&device_scale_factor=1&format=jpg&image_quality=85&block_ads=true&block_cookie_banners=true&block_trackers=true&full_page=false&delay=3&timeout=25&clip_x=0&clip_y=0&clip_width=1280&clip_height=900`;
+      const ssUrl = `https://api.screenshotone.com/take?access_key=${ssKey}&url=${encodeURIComponent(url)}&viewport_width=1280&viewport_height=900&device_scale_factor=1&format=jpg&image_quality=85&block_ads=true&block_cookie_banners=true&block_trackers=true&full_page=false&delay=3&timeout=25&ignore_host_errors=true&clip_x=0&clip_y=0&clip_width=1280&clip_height=900`;
       incrementScreenshotUsage();
       const loaded = await tryLoadImage(ssUrl);
       if (loaded) {
