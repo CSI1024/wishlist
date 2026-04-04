@@ -851,6 +851,185 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* IMAGE UPLOAD ZONE */
+  .image-zone {
+    width: 100%;
+    height: 160px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    background: var(--cream);
+  }
+  .image-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+  .image-zone.drag-over { border-color: var(--accent); background: var(--accent-light); transform: scale(1.01); }
+  .image-zone.has-image { border-style: solid; border-color: var(--border); }
+  .image-zone-placeholder { text-align: center; pointer-events: none; }
+
+  /* CAPSULE WARDROBE */
+  .capsule-season-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .capsule-season-tab {
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--warm-white);
+    color: var(--muted);
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .capsule-season-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+  .capsule-season-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+  .capsule-season-tab .del-season { opacity: 0; font-size: 11px; transition: opacity 0.15s; }
+  .capsule-season-tab:hover .del-season { opacity: 1; }
+
+  .capsule-context {
+    margin-bottom: 32px;
+  }
+
+  .capsule-context-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .capsule-context-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .capsule-category {
+    margin-bottom: 20px;
+    margin-left: 0px;
+  }
+
+  .capsule-category-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .capsule-category-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .capsule-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .capsule-slot {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--card-bg);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .capsule-slot:hover { box-shadow: var(--shadow-hover); border-color: var(--accent); transform: translateY(-2px); }
+
+  .capsule-slot-img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    position: relative;
+  }
+
+  .capsule-slot-img img { width: 100%; height: 100%; object-fit: cover; }
+
+  .capsule-owned-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(122,158,135,0.9);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .capsule-looking-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(201,169,110,0.9);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .capsule-slot-body { padding: 10px 12px; }
+  .capsule-slot-title { font-size: 13px; font-weight: 500; line-height: 1.3; margin-bottom: 4px; }
+  .capsule-slot-note { font-size: 11px; color: var(--muted); font-style: italic; }
+
+  .capsule-add-slot {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    transition: all 0.15s;
+    gap: 6px;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .capsule-add-slot:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  .capsule-add-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .capsule-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
   /* autocomplete dropdown */
   .autocomplete {
     position: absolute;
@@ -889,7 +1068,8 @@
   <!-- TAB NAV -->
   <div class="tab-nav">
     <button class="tab active" onclick="switchTab('all', this)">All items</button>
-    <button class="tab" onclick="switchTab('groups', this)">Compare groups</button>
+    <button class="tab" onclick="switchTab('groups', this)">Compare</button>
+    <button class="tab" onclick="switchTab('capsule', this)">Capsule</button>
     <button class="tab" onclick="switchTab('bought', this)">Bought ✓</button>
     <button class="tab" onclick="switchTab('setup', this)">Setup</button>
   </div>
@@ -922,6 +1102,23 @@
     </div>
   </div>
 
+  <!-- CAPSULE WARDROBE VIEW -->
+  <div id="view-capsule" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;">Capsule Wardrobe</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px;">Build your perfect wardrobe, slot by slot</div>
+      </div>
+      <button class="btn btn-primary" onclick="openAddSeasonModal()">+ Season</button>
+    </div>
+
+    <!-- Season tabs -->
+    <div id="capsuleSeasonTabs" class="capsule-season-tabs"></div>
+
+    <!-- Season content -->
+    <div id="capsuleContent"></div>
+  </div>
+
   <!-- BOUGHT VIEW -->
   <div id="view-bought" style="display:none">
     <div class="grid" id="boughtGrid"></div>
@@ -944,6 +1141,17 @@
         <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
       </div>
       <div id="apiKeyStatus" style="font-size:12px;margin-top:8px;color:var(--muted);"></div>
+    </div>
+
+    <div class="bookmarklet-box" id="screenshotKeyBox">
+      <h3>📸 Screenshotone API Key</h3>
+      <p>Used to automatically capture product images. Free tier = 100 screenshots/month. Get your key at <strong>screenshotone.com</strong> → Dashboard.</p>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <input type="password" id="screenshotKeyInput" placeholder="Your access key…" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--warm-white);color:var(--ink);outline:none;">
+        <button class="btn btn-primary" onclick="saveScreenshotKey()">Save</button>
+      </div>
+      <div id="screenshotKeyStatus" style="font-size:12px;margin-top:8px;color:var(--muted);"></div>
+      <div id="screenshotUsage" style="font-size:12px;margin-top:6px;color:var(--muted);"></div>
     </div>
 
     <div class="bookmarklet-box">
@@ -986,16 +1194,27 @@
 
     <div class="fetch-status" id="fetchStatus"></div>
 
-    <!-- PREVIEW IMAGE -->
+    <!-- IMAGE UPLOAD ZONE -->
+    <div id="imageZone" class="image-zone" onclick="document.getElementById('imageFileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleImageDrop(event)">
+      <div id="imageZonePlaceholder" class="image-zone-placeholder">
+        <div style="font-size:28px;margin-bottom:6px;">📸</div>
+        <div style="font-size:13px;font-weight:500;color:var(--ink);">Drop screenshot here</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">or tap to upload from camera roll</div>
+      </div>
+      <img id="previewImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:10px;">
+      <button id="removeImgBtn" onclick="removeImage(event)" style="display:none;position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;line-height:26px;text-align:center;">✕</button>
+    </div>
+    <input type="file" id="imageFileInput" accept="image/*" style="display:none" onchange="handleImageFile(event)">
+
+    <!-- PREVIEW (shown after fetch auto-grabs image) -->
     <div class="preview-img-wrap" id="previewWrap" style="display:none">
-      <img id="previewImg" src="" alt="">
     </div>
 
     <!-- FIELDS ROW 1 -->
     <div class="form-row">
       <div class="field">
         <label>Item name</label>
-        <input type="text" id="fieldName" placeholder="e.g. Cropped Cardigan">
+        <input type="text" id="fieldName" placeholder="e.g. Cropped Cardigan" oninput="inferFromName()">
       </div>
       <div class="field">
         <label>Price</label>
@@ -1007,7 +1226,7 @@
     <div class="form-row">
       <div class="field">
         <label>Category</label>
-        <select id="fieldCategory">
+        <select id="fieldCategory" onchange="inferSubcategory()">
           <option value="">Select…</option>
           <option>Clothing</option>
           <option>Shoes</option>
@@ -1019,6 +1238,14 @@
           <option>Other</option>
         </select>
       </div>
+      <div class="field">
+        <label>Subcategory <span style="font-weight:400;text-transform:none;font-size:10px;">(optional)</span></label>
+        <input type="text" id="fieldSubcategory" placeholder="e.g. Cardigan, Dress, Sneaker">
+      </div>
+    </div>
+
+    <!-- COLOR -->
+    <div class="form-row single">
       <div class="field">
         <label>Color</label>
         <input type="text" id="fieldColor" placeholder="e.g. Beige">
@@ -1070,8 +1297,11 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
-// ── STATE ──
 let items = JSON.parse(localStorage.getItem('wishlist_items') || '[]');
 let editingId = null;
 let selectedPriority = 'maybe';
@@ -1113,6 +1343,7 @@ function switchTab(tab, el) {
   document.getElementById('view-' + tab).style.display = 'block';
   if (tab === 'groups') renderGroups();
   if (tab === 'bought') renderBought();
+  if (tab === 'capsule') renderCapsule();
 }
 
 function showSetup() {
@@ -1217,6 +1448,7 @@ function cardHTML(item, bought=false) {
       <div class="card-site">
         ${favicon ? `<img class="site-favicon" src="${favicon}" alt="" onerror="this.style.display='none'">` : ''}
         <span class="site-name">${item.site || getDomain(item.url) || '—'}</span>
+        ${item.subcategory ? `<span style="color:var(--accent);font-size:11px;font-weight:500;">· ${item.subcategory}</span>` : ''}
       </div>
       <div class="card-name">${item.name || 'Untitled item'}</div>
       <div class="card-meta">
@@ -1245,8 +1477,8 @@ function compareCardHTML(item) {
       <div class="compare-site">
         ${favicon ? `<img class="site-favicon" src="${favicon}" alt="" onerror="this.style.display='none'">` : ''}
         <span class="site-name">${item.site || getDomain(item.url) || '—'}</span>
+        ${item.subcategory ? `<span style="color:var(--accent);font-size:11px;font-weight:500;">· ${item.subcategory}</span>` : ''}
       </div>
-      <div class="compare-name">${item.name || 'Untitled'}</div>
       <div class="compare-price">${item.price || '—'}</div>
       ${item.color ? `<div class="compare-detail">🎨 ${item.color}</div>` : ''}
       ${item.notes ? `<div class="compare-note">${item.notes}</div>` : ''}
@@ -1254,32 +1486,6 @@ function compareCardHTML(item) {
       ${item.url ? `<button class="compare-visit-btn" onclick="window.open('${item.url}','_blank')">Visit site →</button>` : ''}
     </div>
   </div>`;
-}
-
-// ── ACTIONS ──
-function markBought(id) {
-  items = items.map(i => i.id===id ? {...i, purchased:true} : i);
-  save(); renderAll(); toast('Marked as purchased ✓');
-}
-function unmarkBought(id) {
-  items = items.map(i => i.id===id ? {...i, purchased:false} : i);
-  save(); renderBought(); toast('Moved back to wishlist');
-}
-function deleteItem(id) {
-  if (!confirm('Delete this item?')) return;
-  items = items.filter(i => i.id !== id);
-  save(); renderAll(); renderGroups(); renderBought(); toast('Deleted');
-}
-function pickThis(id) {
-  const item = items.find(i => i.id===id);
-  if (!item || !item.group) return;
-  if (!confirm(`Pick "${item.name}" and archive the others in this group?`)) return;
-  items = items.map(i => {
-    if (i.group === item.group && i.id !== id) return {...i, purchased:true};
-    if (i.id === id) return {...i, purchased:true};
-    return i;
-  });
-  save(); renderGroups(); renderBought(); toast('Great pick! Others archived ✓');
 }
 
 // ── ADD MODAL ──
@@ -1310,19 +1516,29 @@ function editItem(id) {
   document.getElementById('fieldGroup').value = item.group || '';
   document.getElementById('fieldSite').value = item.site || '';
   document.getElementById('fieldNotes').value = item.notes || '';
+  document.getElementById('fieldSubcategory').value = item.subcategory || '';
   setPriority(item.priority || 'maybe');
   if (item.image) {
-    document.getElementById('previewImg').src = item.image;
-    document.getElementById('previewWrap').style.display = 'flex';
+    const img = document.getElementById('previewImg');
+    img.src = item.image;
+    img.style.display = 'block';
+    document.getElementById('imageZonePlaceholder').style.display = 'none';
+    document.getElementById('removeImgBtn').style.display = 'block';
+    document.getElementById('imageZone').classList.add('has-image');
   }
   document.getElementById('addModal').style.display = 'flex';
 }
 
 function clearForm() {
-  ['urlInput','fieldName','fieldPrice','fieldColor','fieldGroup','fieldSite','fieldNotes'].forEach(id => document.getElementById(id).value='');
+  ['urlInput','fieldName','fieldPrice','fieldColor','fieldGroup','fieldSite','fieldNotes','fieldSubcategory'].forEach(id => document.getElementById(id).value='');
   document.getElementById('fieldCategory').value = '';
   document.getElementById('previewWrap').style.display = 'none';
-  document.getElementById('previewImg').src = '';
+  const img = document.getElementById('previewImg');
+  img.src = ''; img.style.display = 'none';
+  document.getElementById('imageZonePlaceholder').style.display = 'block';
+  document.getElementById('removeImgBtn').style.display = 'none';
+  document.getElementById('imageZone').classList.remove('has-image');
+  document.getElementById('imageFileInput').value = '';
   document.getElementById('fetchStatus').innerHTML = '';
   document.getElementById('fetchBtn').disabled = true;
   setPriority('maybe');
@@ -1362,16 +1578,18 @@ async function fetchProductInfo() {
   const btn = document.getElementById('fetchBtn');
   const status = document.getElementById('fetchStatus');
   btn.disabled = true;
-  status.innerHTML = '<span class="spinner"></span> Fetching product details…';
 
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    status.innerHTML = '⚠ No API key — add it in the Setup tab';
+    status.style.color = 'var(--love)';
+    btn.disabled = false;
+    return;
+  }
+
+  // ── STEP 1: Claude extracts info from URL ──
+  status.innerHTML = '<span class="spinner"></span> Fetching product details…';
   try {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      status.innerHTML = '⚠ No API key — add it in the Setup tab';
-      status.style.color = 'var(--love)';
-      btn.disabled = false;
-      return;
-    }
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
@@ -1380,64 +1598,204 @@ async function fetchProductInfo() {
         max_tokens: 1000,
         messages: [{
           role: "user",
-          content: `You are a shopping assistant. Given this product URL, extract product details. Return ONLY valid JSON with these exact keys (use null for anything you can't determine):
+          content: `You are a shopping assistant. Analyze this product URL and extract everything you can from the URL slug, domain, and path. Return ONLY valid JSON, no markdown, no preamble:
 {
-  "name": "product name",
-  "price": "price with currency symbol e.g. $49",
-  "color": "color(s) e.g. Beige, Navy",
+  "name": "product name from URL slug e.g. 'Casbah Linen Dress'",
+  "color": "color if in URL and not a number, else null",
   "category": one of: "Clothing","Shoes","Accessories","Bags","Home","Beauty","Tech","Other",
-  "item_type": "specific item type e.g. Cropped Cardigan, Ankle Boot, Tote Bag",
-  "site": "retailer name e.g. Zara, Aritzia",
-  "image_url": "direct URL to main product image if identifiable from the URL pattern, else null",
-  "description": "one short sentence about the item"
+  "subcategory": "specific item type e.g. Dress, Cardigan, Sneaker, Tote",
+  "site": "retailer name from domain e.g. Zara, Aritzia, Net-a-Porter"
 }
 
-Product URL: ${url}
-
-IMPORTANT: Return ONLY the JSON object, no other text.`
+URL: ${url}`
         }]
       })
     });
 
     const data = await response.json();
-    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
     let info = {};
-    try {
-      const clean = text.replace(/```json|```/g,'').trim();
-      info = JSON.parse(clean);
-    } catch { /* partial fill */ }
+    try { info = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch {}
 
-    if (info.name) document.getElementById('fieldName').value = info.name + (info.item_type && !info.name.toLowerCase().includes(info.item_type.toLowerCase()) ? '' : '');
-    if (info.price) document.getElementById('fieldPrice').value = info.price;
+    if (info.name) document.getElementById('fieldName').value = info.name;
     if (info.color) document.getElementById('fieldColor').value = info.color;
     if (info.category) document.getElementById('fieldCategory').value = info.category;
+    if (info.subcategory) document.getElementById('fieldSubcategory').value = info.subcategory;
     if (info.site) document.getElementById('fieldSite').value = info.site;
-    if (info.item_type && !document.getElementById('fieldName').value) document.getElementById('fieldName').value = info.item_type;
+    inferFromName();
 
-    // Try to load image
-    if (info.image_url) {
-      const img = document.getElementById('previewImg');
-      img.src = info.image_url;
-      img.onload = () => { document.getElementById('previewWrap').style.display='flex'; };
-      img.onerror = () => { document.getElementById('previewWrap').style.display='none'; };
-    }
-
-    // Auto-suggest group based on item_type
-    if (info.item_type && !document.getElementById('fieldGroup').value) {
+    const subcat = info.subcategory || '';
+    if (subcat && !document.getElementById('fieldGroup').value) {
       const existing = [...new Set(items.map(i => i.group).filter(Boolean))];
-      const match = existing.find(g => g.toLowerCase().includes((info.item_type||'').toLowerCase()) || (info.item_type||'').toLowerCase().includes(g.toLowerCase()));
+      const match = existing.find(g => g.toLowerCase().includes(subcat.toLowerCase()) || subcat.toLowerCase().includes(g.toLowerCase()));
       if (match) document.getElementById('fieldGroup').value = match;
     }
 
-    status.innerHTML = '✓ Details filled in — review and save';
+    // ── STEP 2: Screenshotone for thumbnail ──
+    const ssKey = getScreenshotKey();
+    const ssUsage = getScreenshotUsage();
+    if (ssKey && ssUsage.count < 100) {
+      status.innerHTML = '<span class="spinner"></span> Capturing page screenshot…';
+      // Full page screenshot cropped to top portion where product image + price live
+      const ssUrl = `https://api.screenshotone.com/take?access_key=${ssKey}&url=${encodeURIComponent(url)}&viewport_width=1280&viewport_height=900&device_scale_factor=1&format=jpg&image_quality=85&block_ads=true&block_cookie_banners=true&block_trackers=true&full_page=false&delay=3&timeout=25&ignore_host_errors=true&clip_x=0&clip_y=0&clip_width=1280&clip_height=900`;
+      incrementScreenshotUsage();
+      const loaded = await tryLoadImage(ssUrl);
+      if (loaded) {
+        const img = document.getElementById('previewImg');
+        img.src = ssUrl;
+        img.style.display = 'block';
+        document.getElementById('imageZonePlaceholder').style.display = 'none';
+        document.getElementById('removeImgBtn').style.display = 'block';
+        document.getElementById('imageZone').classList.add('has-image');
+        status.innerHTML = '✓ Done — enter price & save';
+      } else {
+        status.innerHTML = '✓ Details filled in — enter price & save';
+      }
+      updateScreenshotUsageDisplay();
+    } else if (ssKey && ssUsage.count >= 100) {
+      status.innerHTML = '✓ Details filled in — screenshot limit reached for month';
+      toast('📸 100/100 screenshots used — resets 1st of next month');
+    } else {
+      status.innerHTML = '✓ Details filled in — add Screenshotone key in Setup for images';
+    }
     status.style.color = 'var(--maybe)';
 
   } catch (err) {
+    console.error('Fetch error:', err);
     status.innerHTML = '⚠ Couldn\'t fetch details — fill in manually';
     status.style.color = 'var(--love)';
   }
 
   btn.disabled = false;
+}
+
+function tryLoadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = src;
+    setTimeout(() => resolve(false), 5000);
+  });
+}
+
+// ── CATEGORY INFERENCE FROM NAME ──
+function inferFromName() {
+  const name = document.getElementById('fieldName').value.trim().toLowerCase();
+  if (!name) return;
+  const catMap = [
+    { cat: 'Clothing', subs: ['dress','cardigan','sweater','shirt','blouse','jacket','coat','jeans','pants','trousers','skirt','top','tee','hoodie','blazer','shorts','leggings','jumpsuit','romper','vest','knitwear','knit'] },
+    { cat: 'Shoes', subs: ['sneaker','boot','heel','flat','sandal','loafer','mule','pump','oxford','slipper','clog','wedge'] },
+    { cat: 'Bags', subs: ['bag','tote','clutch','purse','backpack','crossbody','satchel','wallet','pouch'] },
+    { cat: 'Accessories', subs: ['necklace','earring','bracelet','ring','watch','belt','scarf','hat','cap','sunglasses','glasses'] },
+    { cat: 'Beauty', subs: ['serum','moisturizer','lipstick','mascara','foundation','perfume','cream','oil','cleanser','toner','mask'] },
+    { cat: 'Home', subs: ['candle','pillow','throw','blanket','vase','lamp','rug','frame','bowl','mug','plate'] },
+    { cat: 'Tech', subs: ['phone','laptop','headphone','airpod','charger','cable','keyboard','mouse','tablet','watch'] },
+  ];
+  for (const { cat, subs } of catMap) {
+    const match = subs.find(s => name.includes(s));
+    if (match) {
+      if (!document.getElementById('fieldCategory').value) document.getElementById('fieldCategory').value = cat;
+      if (!document.getElementById('fieldSubcategory').value) document.getElementById('fieldSubcategory').value = match.charAt(0).toUpperCase() + match.slice(1);
+      return;
+    }
+  }
+}
+
+// ── IMAGE UPLOAD ──
+function handleImageDrop(e) {
+  e.preventDefault();
+  document.getElementById('imageZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImageFile(file);
+}
+
+function handleImageFile(e) {
+  const file = e.target.files[0];
+  if (file) loadImageFile(file);
+}
+
+async function loadImageFile(file) {
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const img = document.getElementById('previewImg');
+    img.src = e.target.result; // show immediately
+    img.style.display = 'block';
+    document.getElementById('imageZonePlaceholder').style.display = 'none';
+    document.getElementById('removeImgBtn').style.display = 'block';
+    document.getElementById('imageZone').classList.add('has-image');
+    // Upload to Firebase Storage in background
+    const url = await uploadImageToStorage(e.target.result, `items/${Date.now()}_${file.name}`);
+    img.src = url; // replace with storage URL
+    // Auto-extract info from screenshot
+    analyzeScreenshot(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeScreenshot(base64DataUrl) {
+  const apiKey = getApiKey();
+  if (!apiKey) return;
+  const status = document.getElementById('fetchStatus');
+  status.innerHTML = '<span class="spinner"></span> Reading screenshot…';
+  status.style.color = 'var(--muted)';
+  try {
+    // Strip the data:image/...;base64, prefix
+    const base64 = base64DataUrl.split(',')[1];
+    const mediaType = base64DataUrl.match(/data:(image\/\w+);/)[1];
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 500,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+            { type: "text", text: `You are a shopping assistant. Look at this screenshot of a product page and extract details. Return ONLY valid JSON, no markdown:
+{
+  "name": "product name if visible, else null",
+  "price": "price with currency symbol if visible e.g. $49, else null",
+  "color": "color name if visible and not a number, else null",
+  "site": "retailer name if logo/domain visible, else null",
+  "category": one of: "Clothing","Shoes","Accessories","Bags","Home","Beauty","Tech","Other" or null,
+  "subcategory": "specific item type e.g. Dress, Cardigan, Sneaker if determinable, else null"
+}` }
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
+    let info = {};
+    try { info = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch {}
+
+    if (info.name && !document.getElementById('fieldName').value) document.getElementById('fieldName').value = info.name;
+    if (info.price && !document.getElementById('fieldPrice').value) document.getElementById('fieldPrice').value = info.price;
+    if (info.color && !document.getElementById('fieldColor').value) document.getElementById('fieldColor').value = info.color;
+    if (info.site && !document.getElementById('fieldSite').value) document.getElementById('fieldSite').value = info.site;
+    if (info.category && !document.getElementById('fieldCategory').value) document.getElementById('fieldCategory').value = info.category;
+    if (info.subcategory && !document.getElementById('fieldSubcategory').value) document.getElementById('fieldSubcategory').value = info.subcategory;
+    inferFromName();
+
+    status.innerHTML = '✓ Screenshot read — review and save';
+    status.style.color = 'var(--maybe)';
+  } catch (err) {
+    console.error('Screenshot analysis error:', err);
+    status.innerHTML = '';
+  }
+}
+
+function removeImage(e) {
+  e.stopPropagation();
+  const img = document.getElementById('previewImg');
+  img.src = '';
+  img.style.display = 'none';
+  document.getElementById('imageZonePlaceholder').style.display = 'block';
+  document.getElementById('removeImgBtn').style.display = 'none';
+  document.getElementById('imageZone').classList.remove('has-image');
+  document.getElementById('imageFileInput').value = '';
 }
 
 // ── GROUP AUTOCOMPLETE ──
@@ -1469,48 +1827,15 @@ function setPriority(p) {
   });
 }
 
-// ── SAVE ──
-function saveItem() {
-  const name = document.getElementById('fieldName').value.trim();
-  if (!name) { toast('Please add a name for this item'); return; }
-  const url = document.getElementById('urlInput').value.trim();
-  const imgSrc = document.getElementById('previewImg').src;
-  const image = imgSrc && imgSrc !== window.location.href ? imgSrc : '';
-
-  const item = {
-    id: editingId || Date.now().toString(),
-    url,
-    name,
-    price: document.getElementById('fieldPrice').value.trim(),
-    category: document.getElementById('fieldCategory').value,
-    color: document.getElementById('fieldColor').value.trim(),
-    group: document.getElementById('fieldGroup').value.trim(),
-    site: document.getElementById('fieldSite').value.trim() || (url ? capitalize(getDomain(url).split('.')[0]) : ''),
-    notes: document.getElementById('fieldNotes').value.trim(),
-    priority: selectedPriority,
-    image,
-    purchased: false,
-    addedAt: editingId ? (items.find(i=>i.id===editingId)?.addedAt || Date.now()) : Date.now()
-  };
-
-  if (editingId) {
-    items = items.map(i => i.id===editingId ? item : i);
-    toast('Updated ✓');
-  } else {
-    items = [item, ...items];
-    toast('Added to wishlist ✓');
-  }
-
-  save(); closeModal(); renderAll(); renderGroups(); renderBought();
-}
-
 // ── UTILS ──
-function save() { localStorage.setItem('wishlist_items', JSON.stringify(items)); }
 function getDomain(url) { try { return new URL(url).hostname.replace('www.',''); } catch { return ''; } }
 function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-function clearAll() {
+async function clearAll() {
   if (!confirm('Delete ALL items? This cannot be undone.')) return;
-  items = []; save(); renderAll(); renderGroups(); renderBought(); toast('All cleared');
+  const batch = db.batch();
+  items.forEach(i => batch.delete(db.collection('items').doc(i.id)));
+  await batch.commit();
+  items = []; renderAll(); renderGroups(); renderBought(); toast('All cleared');
 }
 
 let toastTimer;
@@ -1522,7 +1847,54 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-// ── API KEY ──
+// ── SCREENSHOT KEY ──
+function saveScreenshotKey() {
+  const key = document.getElementById('screenshotKeyInput').value.trim();
+  if (!key) { toast('Please enter a key'); return; }
+  localStorage.setItem('wishlist_ss_key', key);
+  document.getElementById('screenshotKeyInput').value = '';
+  showScreenshotKeyStatus();
+  toast('Screenshotone key saved ✓');
+}
+
+function getScreenshotKey() { return localStorage.getItem('wishlist_ss_key') || ''; }
+
+function showScreenshotKeyStatus() {
+  const key = getScreenshotKey();
+  const el = document.getElementById('screenshotKeyStatus');
+  if (!el) return;
+  el.innerHTML = key ? '✓ Key saved — ends in …' + key.slice(-4) : 'No key saved yet';
+  el.style.color = key ? 'var(--maybe)' : 'var(--muted)';
+  updateScreenshotUsageDisplay();
+}
+
+function getScreenshotUsage() {
+  const stored = JSON.parse(localStorage.getItem('wishlist_ss_usage') || '{}');
+  const month = new Date().toISOString().slice(0,7);
+  if (stored.month !== month) return { month, count: 0 };
+  return stored;
+}
+
+function incrementScreenshotUsage() {
+  const usage = getScreenshotUsage();
+  usage.count = (usage.count || 0) + 1;
+  localStorage.setItem('wishlist_ss_usage', JSON.stringify(usage));
+}
+
+function updateScreenshotUsageDisplay() {
+  const el = document.getElementById('screenshotUsage');
+  if (!el) return;
+  const usage = getScreenshotUsage();
+  const count = usage.count || 0;
+  const remaining = 100 - count;
+  let color = 'var(--muted)';
+  if (count >= 100) color = 'var(--love)';
+  else if (count >= 80) color = 'var(--accent)';
+  el.innerHTML = `📸 ${count}/100 screenshots used this month (${remaining} remaining)`;
+  el.style.color = color;
+}
+
+// ── API KEY (still stored locally — it's a secret) ──
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
   if (!key.startsWith('sk-ant-')) { toast('That doesn\'t look right — should start with sk-ant-'); return; }
@@ -1549,9 +1921,489 @@ function getApiKey() {
   return localStorage.getItem('wishlist_api_key') || '';
 }
 
+// ── CAPSULE WARDROBE ──
+let capsule = JSON.parse(localStorage.getItem('wishlist_capsule') || 'null') || {
+  seasons: [
+    { id: 's1', name: 'Spring', emoji: '🌸', contexts: [] },
+    { id: 's2', name: 'Summer', emoji: '☀️', contexts: [] },
+    { id: 's3', name: 'Fall', emoji: '🍂', contexts: [] },
+    { id: 's4', name: 'Winter', emoji: '❄️', contexts: [] },
+  ]
+};
+let activeSeason = capsule.seasons[0]?.id || null;
+function saveCapsule() {
+  localStorage.setItem('wishlist_capsule', JSON.stringify(capsule)); // full local save with images
+  // Strip base64 images before Firestore (too large) — structure/notes/status sync, photos stay local
+  const stripped = JSON.parse(JSON.stringify(capsule));
+  stripped.seasons.forEach(s => s.contexts?.forEach(ctx => ctx.categories?.forEach(cat => cat.slots?.forEach(slot => {
+    if (slot.image?.startsWith('data:')) slot.image = null;
+  }))));
+  try {
+    db.collection('meta').doc('capsule').set({ capsule: stripped });
+  } catch(e) {
+    console.error('Capsule save error:', e);
+  }
+}
+
+function renderCapsule() {
+  // Season tabs
+  const tabs = document.getElementById('capsuleSeasonTabs');
+  tabs.innerHTML = capsule.seasons.map(s => `
+    <button class="capsule-season-tab${s.id === activeSeason ? ' active' : ''}" onclick="setActiveSeason('${s.id}')">
+      ${s.emoji} ${s.name}
+      <span class="del-season" onclick="deleteSeason(event,'${s.id}')">✕</span>
+    </button>
+  `).join('') + `<button class="capsule-add-btn" onclick="openAddSeasonModal()" style="border-radius:20px;">+ Season</button>`;
+
+  // Content for active season
+  const content = document.getElementById('capsuleContent');
+  const season = capsule.seasons.find(s => s.id === activeSeason);
+  if (!season) { content.innerHTML = ''; return; }
+
+  if (!season.contexts.length) {
+    content.innerHTML = `
+      <div class="empty" style="padding:40px 0">
+        <div class="empty-icon">👗</div>
+        <h3>No contexts yet</h3>
+        <p>Add a context like "Casual", "Work", or "Night Out" to get started.</p>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="openAddContextModal('${season.id}')">+ Add context</button>
+      </div>`;
+    return;
+  }
+
+  content.innerHTML = season.contexts.map(ctx => `
+    <div class="capsule-context">
+      <div class="capsule-context-header">
+        <div class="capsule-context-title">${ctx.emoji || '✨'} ${ctx.name}</div>
+        <button class="capsule-add-btn" onclick="openAddCategoryModal('${season.id}','${ctx.id}')">+ Category</button>
+        <button class="capsule-add-btn" onclick="deleteContext('${season.id}','${ctx.id}')" style="color:var(--love);border-color:var(--love)">✕</button>
+      </div>
+      ${ctx.categories?.length ? ctx.categories.map(cat => `
+        <div class="capsule-category">
+          <div class="capsule-category-header">
+            <div class="capsule-category-label">${cat.name}</div>
+            <button class="capsule-add-btn" onclick="deleteCategory('${season.id}','${ctx.id}','${cat.id}')" style="font-size:10px;color:var(--muted)">✕</button>
+          </div>
+          <div class="capsule-slots">
+            ${(cat.slots || []).map(slot => capsuleSlotHTML(season.id, ctx.id, cat.id, slot)).join('')}
+            <button class="capsule-add-slot" onclick="openAddSlotModal('${season.id}','${ctx.id}','${cat.id}')">
+              <span style="font-size:22px">+</span>
+              <span>Add slot</span>
+            </button>
+          </div>
+        </div>
+      `).join('') : `
+        <div style="color:var(--muted);font-size:13px;padding:8px 0 16px;">No categories yet — add one above.</div>
+      `}
+    </div>
+  `).join('') + `
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="openAddContextModal('${season.id}')">+ Add context</button>
+  `;
+}
+
+function capsuleSlotHTML(seasonId, ctxId, catId, slot) {
+  const owned = slot.status === 'owned';
+  return `
+  <div class="capsule-slot" onclick="openEditSlotModal('${seasonId}','${ctxId}','${catId}','${slot.id}')">
+    <div class="capsule-slot-img" style="position:relative">
+      ${slot.image
+        ? `<img src="${slot.image}" alt="" style="width:100%;height:100%;object-fit:cover">`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:linear-gradient(135deg,var(--cream),var(--accent-light))">${owned ? '✓' : '🔍'}</div>`}
+      <div class="${owned ? 'capsule-owned-badge' : 'capsule-looking-badge'}">${owned ? '✓ Own it' : 'Looking'}</div>
+    </div>
+    <div class="capsule-slot-body">
+      <div class="capsule-slot-title">${slot.title}</div>
+      ${slot.note ? `<div class="capsule-slot-note">${slot.note}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function setActiveSeason(id) { activeSeason = id; renderCapsule(); }
+
+function deleteSeason(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this season?')) return;
+  capsule.seasons = capsule.seasons.filter(s => s.id !== id);
+  if (activeSeason === id) activeSeason = capsule.seasons[0]?.id || null;
+  saveCapsule(); renderCapsule();
+}
+
+function deleteContext(seasonId, ctxId) {
+  if (!confirm('Delete this context and all its slots?')) return;
+  const s = capsule.seasons.find(s => s.id === seasonId);
+  s.contexts = s.contexts.filter(c => c.id !== ctxId);
+  saveCapsule(); renderCapsule();
+}
+
+function deleteCategory(seasonId, ctxId, catId) {
+  if (!confirm('Delete this category and all its slots?')) return;
+  const ctx = capsule.seasons.find(s => s.id === seasonId)?.contexts.find(c => c.id === ctxId);
+  if (ctx) ctx.categories = ctx.categories.filter(c => c.id !== catId);
+  saveCapsule(); renderCapsule();
+}
+
+// ── CAPSULE MODALS ──
+function openAddSeasonModal() {
+  showCapsuleModal(`
+    <h2>Add season</h2>
+    <div class="form-row">
+      <div class="field"><label>Name</label><input type="text" id="cSeasonName" placeholder="e.g. Spring"></div>
+      <div class="field"><label>Emoji</label><input type="text" id="cSeasonEmoji" placeholder="🌸" maxlength="2"></div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="submitAddSeason()">Add season</button>
+      <button class="btn btn-ghost" onclick="closeCapsuleModal()">Cancel</button>
+    </div>
+  `);
+}
+
+function submitAddSeason() {
+  const name = document.getElementById('cSeasonName').value.trim();
+  if (!name) return;
+  const emoji = document.getElementById('cSeasonEmoji').value.trim() || '📅';
+  capsule.seasons.push({ id: 's' + Date.now(), name, emoji, contexts: [] });
+  activeSeason = capsule.seasons[capsule.seasons.length - 1].id;
+  saveCapsule(); closeCapsuleModal(); renderCapsule();
+}
+
+function openAddContextModal(seasonId) {
+  showCapsuleModal(`
+    <h2>Add context</h2>
+    <div class="form-row single">
+      <div class="field"><label>Name</label><input type="text" id="cCtxName" placeholder="e.g. Casual, Work, Night Out"></div>
+    </div>
+    <div class="form-row single">
+      <div class="field"><label>Emoji</label><input type="text" id="cCtxEmoji" placeholder="✨" maxlength="2"></div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="submitAddContext('${seasonId}')">Add</button>
+      <button class="btn btn-ghost" onclick="closeCapsuleModal()">Cancel</button>
+    </div>
+  `);
+}
+
+function submitAddContext(seasonId) {
+  const name = document.getElementById('cCtxName').value.trim();
+  if (!name) return;
+  const emoji = document.getElementById('cCtxEmoji').value.trim() || '✨';
+  const s = capsule.seasons.find(s => s.id === seasonId);
+  if (!s.contexts) s.contexts = [];
+  s.contexts.push({ id: 'c' + Date.now(), name, emoji, categories: [] });
+  saveCapsule(); closeCapsuleModal(); renderCapsule();
+}
+
+function openAddCategoryModal(seasonId, ctxId) {
+  showCapsuleModal(`
+    <h2>Add category</h2>
+    <div class="form-row single">
+      <div class="field"><label>Name</label><input type="text" id="cCatName" placeholder="e.g. Tops, Shoes, Accessories"></div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="submitAddCategory('${seasonId}','${ctxId}')">Add</button>
+      <button class="btn btn-ghost" onclick="closeCapsuleModal()">Cancel</button>
+    </div>
+  `);
+}
+
+function submitAddCategory(seasonId, ctxId) {
+  const name = document.getElementById('cCatName').value.trim();
+  if (!name) return;
+  const ctx = capsule.seasons.find(s => s.id === seasonId)?.contexts.find(c => c.id === ctxId);
+  if (!ctx.categories) ctx.categories = [];
+  ctx.categories.push({ id: 'cat' + Date.now(), name, slots: [] });
+  saveCapsule(); closeCapsuleModal(); renderCapsule();
+}
+
+function openAddSlotModal(seasonId, ctxId, catId) {
+  showCapsuleModal(`
+    <h2>Add slot</h2>
+    <div class="form-row single">
+      <div class="field"><label>What are you looking for?</label><input type="text" id="cSlotTitle" placeholder="e.g. White Linen Pants"></div>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>Status</label>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="priority-opt sel-maybe" id="cStatusLooking" onclick="setCSlotStatus('looking')" style="flex:1">🔍 Still looking</button>
+        <button class="priority-opt" id="cStatusOwned" onclick="setCSlotStatus('owned')" style="flex:1">✓ I own this</button>
+      </div>
+    </div>
+    <div class="form-row single">
+      <div class="field"><label>Notes <span style="font-weight:400;font-size:10px">(optional)</span></label><input type="text" id="cSlotNote" placeholder="e.g. From Zara, size S"></div>
+    </div>
+    <div id="cSlotImgZone" class="image-zone" style="margin-bottom:14px" onclick="document.getElementById('cSlotFileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleCSlotDrop(event)">
+      <div id="cSlotImgPlaceholder" class="image-zone-placeholder">
+        <div style="font-size:24px;margin-bottom:4px;">📸</div>
+        <div style="font-size:12px;font-weight:500;color:var(--ink);">Add photo</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">drop or tap to upload</div>
+      </div>
+      <img id="cSlotImg" src="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:10px;" alt="">
+    </div>
+    <input type="file" id="cSlotFileInput" accept="image/*" style="display:none" onchange="handleCSlotFile(event)">
+    <div class="form-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="submitAddSlot('${seasonId}','${ctxId}','${catId}')">Add slot</button>
+      <button class="btn btn-ghost" onclick="closeCapsuleModal()">Cancel</button>
+    </div>
+  `);
+  window._cSlotStatus = 'looking';
+}
+
+function openEditSlotModal(seasonId, ctxId, catId, slotId) {
+  const cat = capsule.seasons.find(s => s.id === seasonId)?.contexts.find(c => c.id === ctxId)?.categories.find(c => c.id === catId);
+  const slot = cat?.slots.find(s => s.id === slotId);
+  if (!slot) return;
+  showCapsuleModal(`
+    <h2>Edit slot</h2>
+    <div class="form-row single">
+      <div class="field"><label>Title</label><input type="text" id="cSlotTitle" value="${slot.title}" placeholder="e.g. White Linen Pants"></div>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>Status</label>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="priority-opt ${slot.status !== 'owned' ? 'sel-maybe' : ''}" id="cStatusLooking" onclick="setCSlotStatus('looking')" style="flex:1">🔍 Still looking</button>
+        <button class="priority-opt ${slot.status === 'owned' ? 'sel-maybe' : ''}" id="cStatusOwned" onclick="setCSlotStatus('owned')" style="flex:1">✓ I own this</button>
+      </div>
+    </div>
+    <div class="form-row single">
+      <div class="field"><label>Notes</label><input type="text" id="cSlotNote" value="${slot.note || ''}" placeholder="e.g. From Zara, size S"></div>
+    </div>
+    <div id="cSlotImgZone" class="image-zone" style="margin-bottom:14px" onclick="document.getElementById('cSlotFileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleCSlotDrop(event)">
+      <div id="cSlotImgPlaceholder" class="image-zone-placeholder" style="${slot.image ? 'display:none' : ''}">
+        <div style="font-size:24px;margin-bottom:4px;">📸</div>
+        <div style="font-size:12px;font-weight:500;color:var(--ink);">Add photo</div>
+      </div>
+      <img id="cSlotImg" src="${slot.image || ''}" style="display:${slot.image ? 'block' : 'none'};width:100%;height:100%;object-fit:cover;border-radius:10px;" alt="">
+    </div>
+    <input type="file" id="cSlotFileInput" accept="image/*" style="display:none" onchange="handleCSlotFile(event)">
+    <div class="form-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="submitEditSlot('${seasonId}','${ctxId}','${catId}','${slotId}')">Save</button>
+      <button class="btn" style="background:#ef4444;color:white" onclick="deleteSlot('${seasonId}','${ctxId}','${catId}','${slotId}')">Delete</button>
+      <button class="btn btn-ghost" onclick="closeCapsuleModal()">Cancel</button>
+    </div>
+  `);
+  window._cSlotStatus = slot.status || 'looking';
+}
+
+function setCSlotStatus(s) {
+  window._cSlotStatus = s;
+  document.getElementById('cStatusLooking').className = 'priority-opt' + (s === 'looking' ? ' sel-maybe' : '');
+  document.getElementById('cStatusOwned').className = 'priority-opt' + (s === 'owned' ? ' sel-maybe' : '');
+}
+
+function handleCSlotDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadCSlotImage(file);
+}
+
+function handleCSlotFile(e) {
+  const file = e.target.files[0];
+  if (file) loadCSlotImage(file);
+}
+
+async function loadCSlotImage(file) {
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const img = document.getElementById('cSlotImg');
+    img.src = e.target.result; // show immediately
+    img.style.display = 'block';
+    document.getElementById('cSlotImgPlaceholder').style.display = 'none';
+    document.getElementById('cSlotImgZone').classList.add('has-image');
+    // Upload to Firebase Storage in background
+    const url = await uploadImageToStorage(e.target.result, `capsule/${Date.now()}_${file.name}`);
+    img.src = url; // replace with storage URL
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitAddSlot(seasonId, ctxId, catId) {
+  const title = document.getElementById('cSlotTitle').value.trim();
+  if (!title) return;
+  const cat = capsule.seasons.find(s => s.id === seasonId)?.contexts.find(c => c.id === ctxId)?.categories.find(c => c.id === catId);
+  if (!cat.slots) cat.slots = [];
+  const imgEl = document.getElementById('cSlotImg');
+  cat.slots.push({
+    id: 'sl' + Date.now(),
+    title,
+    status: window._cSlotStatus || 'looking',
+    note: document.getElementById('cSlotNote').value.trim(),
+    image: imgEl.src && imgEl.style.display !== 'none' ? imgEl.src : null,
+  });
+  saveCapsule(); closeCapsuleModal(); renderCapsule();
+}
+
+function submitEditSlot(seasonId, ctxId, catId, slotId) {
+  const cat = capsule.seasons.find(s => s.id === seasonId)?.contexts.find(c => c.id === ctxId)?.categories.find(c => c.id === catId);
+  const idx = cat.slots.findIndex(s => s.id === slotId);
+  if (idx === -1) return;
+  const imgEl = document.getElementById('cSlotImg');
+  cat.slots[idx] = {
+    ...cat.slots[idx],
+    title: document.getElementById('cSlotTitle').value.trim(),
+    status: window._cSlotStatus,
+    note: document.getElementById('cSlotNote').value.trim(),
+    image: imgEl.src && imgEl.style.display !== 'none' ? imgEl.src : null,
+  };
+  saveCapsule(); closeCapsuleModal(); renderCapsule();
+}
+
+function deleteSlot(seasonId, ctxId, catId, slotId) {
+  if (!confirm('Delete this slot?')) return;
+  const cat = capsule.seasons.find(s => s.id === seasonId)?.contexts.find(c => c.id === ctxId)?.categories.find(c => c.id === catId);
+  cat.slots = cat.slots.filter(s => s.id !== slotId);
+  saveCapsule(); closeCapsuleModal(); renderCapsule();
+}
+
+// ── CAPSULE MODAL HELPER ──
+function showCapsuleModal(html) {
+  let modal = document.getElementById('capsuleModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'capsuleModal';
+    modal.className = 'overlay';
+    modal.onclick = (e) => { if (e.target === modal) closeCapsuleModal(); };
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `<div class="drawer" onclick="event.stopPropagation()"><div class="drawer-handle"></div>${html}</div>`;
+  modal.style.display = 'flex';
+}
+
+function closeCapsuleModal() {
+  const modal = document.getElementById('capsuleModal');
+  if (modal) modal.style.display = 'none';
+}
+
+// ── FIREBASE ──
+const firebaseConfig = {
+  apiKey: "AIzaSyB5T1CylcMy6m6epq6BGgfFEiLAiP9OC3g",
+  authDomain: "wishlist-358e3.firebaseapp.com",
+  projectId: "wishlist-358e3",
+  storageBucket: "wishlist-358e3.firebasestorage.app",
+  messagingSenderId: "491239855072",
+  appId: "1:491239855072:web:ada1182a979977e2a25185"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const itemsCol = db.collection('items');
+
+// ── IMAGE UPLOAD (local only — no cloud storage) ──
+async function uploadImageToStorage(base64DataUrl, path) {
+  return base64DataUrl; // keep locally, no cloud upload
+}
+
+// Listen for real-time updates
+function startSync() {
+  // Sync wishlist items
+  itemsCol.orderBy('addedAt', 'desc').onSnapshot(snapshot => {
+    items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderAll();
+    renderGroups();
+    renderBought();
+  }, err => {
+    console.error('Firestore error:', err);
+  });
+
+  // Sync capsule wardrobe
+  db.collection('meta').doc('capsule').onSnapshot(doc => {
+    if (doc.exists) {
+      const cloudCapsule = doc.data().capsule;
+      // Merge: use cloud structure but preserve local images
+      const localCapsule = JSON.parse(localStorage.getItem('wishlist_capsule') || 'null');
+      if (localCapsule) {
+        cloudCapsule.seasons.forEach(cs => {
+          const ls = localCapsule.seasons?.find(s => s.id === cs.id);
+          cs.contexts?.forEach(cc => {
+            const lc = ls?.contexts?.find(c => c.id === cc.id);
+            cc.categories?.forEach(ccat => {
+              const lcat = lc?.categories?.find(c => c.id === ccat.id);
+              ccat.slots?.forEach(slot => {
+                const lslot = lcat?.slots?.find(s => s.id === slot.id);
+                if (!slot.image && lslot?.image) slot.image = lslot.image;
+              });
+            });
+          });
+        });
+      }
+      capsule = cloudCapsule;
+      if (!activeSeason && capsule.seasons?.length) activeSeason = capsule.seasons[0].id;
+      localStorage.setItem('wishlist_capsule', JSON.stringify(capsule));
+      if (activeTab === 'capsule') renderCapsule();
+    }
+  }, err => {
+    console.error('Capsule sync error:', err);
+  });
+}
+
+// Save item to Firestore
+async function saveItem() {
+  const name = document.getElementById('fieldName').value.trim();
+  if (!name) { toast('Please add a name for this item'); return; }
+  const url = document.getElementById('urlInput').value.trim();
+  const imgSrc = document.getElementById('previewImg').src;
+  const image = imgSrc && imgSrc !== window.location.href ? imgSrc : '';
+
+  const item = {
+    url,
+    name,
+    price: document.getElementById('fieldPrice').value.trim(),
+    category: document.getElementById('fieldCategory').value,
+    subcategory: document.getElementById('fieldSubcategory').value.trim(),
+    color: document.getElementById('fieldColor').value.trim(),
+    group: document.getElementById('fieldGroup').value.trim(),
+    site: document.getElementById('fieldSite').value.trim() || (url ? capitalize(getDomain(url).split('.')[0]) : ''),
+    notes: document.getElementById('fieldNotes').value.trim(),
+    priority: selectedPriority,
+    image,
+    purchased: false,
+    addedAt: editingId ? (items.find(i=>i.id===editingId)?.addedAt || Date.now()) : Date.now()
+  };
+
+  try {
+    if (editingId) {
+      await itemsCol.doc(editingId).set(item);
+      toast('Updated ✓');
+    } else {
+      await itemsCol.add(item);
+      toast('Added to wishlist ✓');
+    }
+    closeModal();
+  } catch(e) {
+    toast('Error saving — try again');
+    console.error(e);
+  }
+}
+
+async function markBought(id) {
+  await itemsCol.doc(id).update({ purchased: true });
+  toast('Marked as purchased ✓');
+}
+async function unmarkBought(id) {
+  await itemsCol.doc(id).update({ purchased: false });
+  toast('Moved back to wishlist');
+}
+async function deleteItem(id) {
+  if (!confirm('Delete this item?')) return;
+  await itemsCol.doc(id).delete();
+  toast('Deleted');
+}
+async function pickThis(id) {
+  const item = items.find(i => i.id===id);
+  if (!item || !item.group) return;
+  if (!confirm(`Pick "${item.name}" and archive the others in this group?`)) return;
+  const batch = db.batch();
+  items.filter(i => i.group === item.group).forEach(i => {
+    batch.update(itemsCol.doc(i.id), { purchased: true });
+  });
+  await batch.commit();
+  toast('Great pick! Others archived ✓');
+}
+
 // ── START ──
 init();
 showApiKeyStatus();
+showScreenshotKeyStatus();
+startSync();
 </script>
+
 </body>
 </html>
