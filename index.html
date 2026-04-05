@@ -1776,7 +1776,7 @@ async function analyzeScreenshot(base64DataUrl) {
             { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
             { type: "text", text: `You are a shopping assistant. Look at this screenshot of a product page and extract details. Return ONLY valid JSON, no markdown:
 {
-  "name": "product name if visible, else null",
+  "name": "the specific product name (e.g. 'Casbah Linen Dress', 'Samba OG Shoes') — NOT a page section, banner, or promotional heading like 'Your Exclusive Offers', 'New Arrivals', 'Sale'. If no specific product name is visible, return null.",
   "price": "price with currency symbol if visible e.g. $49, else null",
   "color": "color name if visible and not a number, else null",
   "site": "retailer name if logo/domain visible, else null",
