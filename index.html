@@ -1631,6 +1631,12 @@ async function fetchProductInfo() {
     return;
   }
 
+  // Pre-fill name from URL slug immediately — before any API call can overwrite it
+  if (!document.getElementById('fieldName').value) {
+    const slugName = extractNameFromUrl(url);
+    if (slugName) document.getElementById('fieldName').value = slugName;
+  }
+
   // ── STEP 1: Claude extracts info from URL ──
   status.innerHTML = '<span class="spinner"></span> Fetching product details…';
   try {
