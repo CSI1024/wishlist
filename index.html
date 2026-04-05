@@ -1619,9 +1619,9 @@ async function fetchProductInfo() {
         max_tokens: 1000,
         messages: [{
           role: "user",
-          content: `You are a shopping assistant. Analyze this product URL and extract everything you can from the URL slug, domain, and path. Return ONLY valid JSON, no markdown, no preamble:
+          content: `You are a shopping assistant. Analyze this product URL and extract the specific product name from the URL slug. Return ONLY valid JSON, no markdown, no preamble:
 {
-  "name": "product name from URL slug e.g. 'Casbah Linen Dress'",
+  "name": "the specific product name — look at the last meaningful path segment (e.g. 'casbah-linen-dress' → 'Casbah Linen Dress'). IGNORE generic section/category segments like 'sale', 'new-arrivals', 'your-exclusive-offers', 'collection', 'shop', 'women', 'men', 'all'. If no clear product name exists, return null.",
   "color": "color if in URL and not a number, else null",
   "category": one of: "Clothing","Shoes","Accessories","Bags","Home","Beauty","Tech","Other",
   "subcategory": "specific item type e.g. Dress, Cardigan, Sneaker, Tote",
@@ -1638,11 +1638,11 @@ URL: ${url}`
     let info = {};
     try { info = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch {}
 
-    if (info.name) document.getElementById('fieldName').value = info.name;
-    if (info.color) document.getElementById('fieldColor').value = info.color;
-    if (info.category) document.getElementById('fieldCategory').value = info.category;
-    if (info.subcategory) document.getElementById('fieldSubcategory').value = info.subcategory;
-    if (info.site) document.getElementById('fieldSite').value = info.site;
+    if (info.name && !document.getElementById('fieldName').value) document.getElementById('fieldName').value = info.name;
+    if (info.color && !document.getElementById('fieldColor').value) document.getElementById('fieldColor').value = info.color;
+    if (info.category && !document.getElementById('fieldCategory').value) document.getElementById('fieldCategory').value = info.category;
+    if (info.subcategory && !document.getElementById('fieldSubcategory').value) document.getElementById('fieldSubcategory').value = info.subcategory;
+    if (info.site && !document.getElementById('fieldSite').value) document.getElementById('fieldSite').value = info.site;
     inferFromName();
 
     const subcat = info.subcategory || '';
