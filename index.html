@@ -2260,6 +2260,8 @@ function showCapsuleGroupAC(inputId, acId) {
   ac.style.display='block';
   ac.innerHTML = matches.map(g => `<div class="autocomplete-item" onclick="document.getElementById('${inputId}').value='${g}';document.getElementById('${acId}').style.display='none'">${g}</div>`).join('');
 }
+
+function setCSlotStatus(s) {
   window._cSlotStatus = s;
   document.getElementById('cStatusLooking').className = 'priority-opt' + (s === 'looking' ? ' sel-maybe' : '');
   document.getElementById('cStatusOwned').className = 'priority-opt' + (s === 'owned' ? ' sel-maybe' : '');
