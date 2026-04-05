@@ -1567,6 +1567,24 @@ function clearForm() {
 }
 
 // ── URL / FETCH ──
+function extractNameFromUrl(url) {
+  try {
+    const path = new URL(url).pathname;
+    const segments = path.split('/').map(s => s.split('?')[0]).filter(Boolean);
+    const SKIP = new Set(['p','product','products','item','items','dp','shop','store','buy','men','women','womens','mens','kids','clothing','shoes','bags','accessories','home','beauty','tech','sale','new','new-arrivals','collection','collections','category','categories','all','search','browse','detail','pd','plp','pdp']);
+    const candidates = segments.filter(s =>
+      s.includes('-') &&          // must be hyphenated (slug-style)
+      s.length > 10 &&            // must be long enough to be a product name
+      !/^[A-Z0-9]{2,10}$/.test(s) && // skip product codes like CR772, SKU123
+      !SKIP.has(s.toLowerCase())
+    );
+    if (!candidates.length) return null;
+    // pick the longest candidate (most descriptive)
+    const best = candidates.reduce((a, b) => b.length > a.length ? b : a);
+    return best.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  } catch { return null; }
+}
+
 function onUrlInput() {
   const val = document.getElementById('urlInput').value.trim();
   document.getElementById('fetchBtn').disabled = !val.startsWith('http');
@@ -1574,6 +1592,11 @@ function onUrlInput() {
     const domain = getDomain(val);
     if (domain && !document.getElementById('fieldSite').value) {
       document.getElementById('fieldSite').value = capitalize(domain.split('.')[0]);
+    }
+    const name = extractNameFromUrl(val);
+    if (name && !document.getElementById('fieldName').value) {
+      document.getElementById('fieldName').value = name;
+      inferFromName();
     }
   }
 }
