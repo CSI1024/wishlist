@@ -1821,7 +1821,10 @@ async function analyzeScreenshot(base64DataUrl) {
     let info = {};
     try { info = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch {}
 
-    if (info.name && !document.getElementById('fieldName').value) document.getElementById('fieldName').value = info.name;
+    // URL slug is more reliable than screenshot AI (which can misread promo banners)
+    const slugName = extractNameFromUrl(document.getElementById('urlInput').value);
+    const nameToUse = slugName || info.name;
+    if (nameToUse && !document.getElementById('fieldName').value) document.getElementById('fieldName').value = nameToUse;
     if (info.price && !document.getElementById('fieldPrice').value) document.getElementById('fieldPrice').value = info.price;
     if (info.color && !document.getElementById('fieldColor').value) document.getElementById('fieldColor').value = info.color;
     if (info.site && !document.getElementById('fieldSite').value) document.getElementById('fieldSite').value = info.site;
