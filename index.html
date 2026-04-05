@@ -1189,9 +1189,12 @@
 
 <!-- ADD ITEM MODAL -->
 <div class="overlay" id="addModal" style="display:none" onclick="closeModalOutside(event)">
-  <div class="drawer" onclick="event.stopPropagation()">
-    <div class="drawer-handle"></div>
-    <h2>Add item</h2>
+  <div class="drawer" id="addDrawer" onclick="event.stopPropagation()">
+    <div class="drawer-handle" id="drawerHandle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="margin-bottom:0">Add item</h2>
+      <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted);padding:4px;line-height:1">✕</button>
+    </div>
 
     <!-- URL ROW -->
     <div class="url-row">
@@ -1392,7 +1395,7 @@ function renderAll() {
   const empty = document.getElementById('allEmpty');
   if (!list.length) { grid.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display = 'none';
-  grid.innerHTML = list.map(cardHTML).join('');
+  grid.innerHTML = list.map(i => cardHTML(i)).join('');
 }
 
 // ── RENDER GROUPS ──
@@ -1508,9 +1511,17 @@ function openAddModal(prefillUrl='') {
     setTimeout(() => fetchProductInfo(), 300);
   }
   document.getElementById('addModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('urlInput').focus(), 100);
+  setTimeout(() => {
+    document.getElementById('urlInput').focus();
+    initSwipeToDismiss();
+  }, 100);
 }
-function closeModal() { document.getElementById('addModal').style.display='none'; editingId=null; }
+function closeModal() {
+  const drawer = document.getElementById('addDrawer');
+  if (drawer) drawer.style.transform = '';
+  document.getElementById('addModal').style.display='none';
+  editingId=null;
+}
 function closeModalOutside(e) { if (e.target === document.getElementById('addModal')) closeModal(); }
 
 function editItem(id) {
@@ -1806,6 +1817,47 @@ function removeImage(e) {
   document.getElementById('removeImgBtn').style.display = 'none';
   document.getElementById('imageZone').classList.remove('has-image');
   document.getElementById('imageFileInput').value = '';
+}
+
+// ── SWIPE DOWN TO CLOSE MODAL ──
+function initSwipeToDismiss() {
+  const drawer = document.getElementById('addDrawer');
+  const handle = document.getElementById('drawerHandle');
+  if (!drawer) return;
+  let startY = 0;
+  let isDragging = false;
+
+  const onStart = (e) => {
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
+    isDragging = true;
+    drawer.style.transition = 'none';
+  };
+
+  const onMove = (e) => {
+    if (!isDragging) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const diff = y - startY;
+    if (diff > 0) {
+      drawer.style.transform = `translateY(${diff}px)`;
+    }
+  };
+
+  const onEnd = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    drawer.style.transition = '';
+    const y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const diff = y - startY;
+    if (diff > 100) {
+      closeModal();
+    } else {
+      drawer.style.transform = '';
+    }
+  };
+
+  drawer.addEventListener('touchstart', onStart, { passive: true });
+  drawer.addEventListener('touchmove', onMove, { passive: true });
+  drawer.addEventListener('touchend', onEnd);
 }
 
 // ── GROUP AUTOCOMPLETE ──
