@@ -1143,6 +1143,16 @@
       <div id="apiKeyStatus" style="font-size:12px;margin-top:8px;color:var(--muted);"></div>
     </div>
 
+    <div class="bookmarklet-box">
+      <h3>☁️ Cloudinary Image Sync</h3>
+      <p>Upload photos sync across all your devices. Free forever. Setup: go to <strong>cloudinary.com</strong> → Settings → Upload → Add upload preset → set to <strong>Unsigned</strong> → copy the preset name.</p>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input type="text" id="cloudinaryPresetInput" placeholder="Upload preset name…" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--warm-white);color:var(--ink);outline:none;">
+        <button class="btn btn-primary" onclick="saveCloudinaryPreset()">Save</button>
+      </div>
+      <div id="cloudinaryStatus" style="font-size:12px;margin-top:8px;color:var(--muted);"></div>
+    </div>
+
     <div class="bookmarklet-box" id="screenshotKeyBox">
       <h3>📸 Screenshotone API Key</h3>
       <p>Used to automatically capture product images. Free tier = 100 screenshots/month. Get your key at <strong>screenshotone.com</strong> → Dashboard.</p>
@@ -1932,8 +1942,8 @@ let capsule = JSON.parse(localStorage.getItem('wishlist_capsule') || 'null') || 
 };
 let activeSeason = capsule.seasons[0]?.id || null;
 function saveCapsule() {
-  localStorage.setItem('wishlist_capsule', JSON.stringify(capsule)); // full local save with images
-  // Strip base64 images before Firestore (too large) — structure/notes/status sync, photos stay local
+  localStorage.setItem('wishlist_capsule', JSON.stringify(capsule));
+  // Strip base64 images before Firestore — Cloudinary URLs are fine, only strip data: URLs
   const stripped = JSON.parse(JSON.stringify(capsule));
   stripped.seasons.forEach(s => s.contexts?.forEach(ctx => ctx.categories?.forEach(cat => cat.slots?.forEach(slot => {
     if (slot.image?.startsWith('data:')) slot.image = null;
@@ -2003,6 +2013,7 @@ function renderCapsule() {
 
 function capsuleSlotHTML(seasonId, ctxId, catId, slot) {
   const owned = slot.status === 'owned';
+  const linkedItems = slot.linkedGroup ? items.filter(i => !i.purchased && i.group === slot.linkedGroup) : [];
   return `
   <div class="capsule-slot" onclick="openEditSlotModal('${seasonId}','${ctxId}','${catId}','${slot.id}')">
     <div class="capsule-slot-img" style="position:relative">
@@ -2014,6 +2025,10 @@ function capsuleSlotHTML(seasonId, ctxId, catId, slot) {
     <div class="capsule-slot-body">
       <div class="capsule-slot-title">${slot.title}</div>
       ${slot.note ? `<div class="capsule-slot-note">${slot.note}</div>` : ''}
+      ${linkedItems.length ? `
+        <button class="capsule-add-btn" style="margin-top:8px;width:100%;text-align:center;color:var(--accent);border-color:var(--accent)" onclick="event.stopPropagation();viewLinkedOptions('${slot.linkedGroup}')">
+          👀 View options (${linkedItems.length})
+        </button>` : ''}
     </div>
   </div>`;
 }
@@ -2130,6 +2145,13 @@ function openAddSlotModal(seasonId, ctxId, catId) {
     <div class="form-row single">
       <div class="field"><label>Notes <span style="font-weight:400;font-size:10px">(optional)</span></label><input type="text" id="cSlotNote" placeholder="e.g. From Zara, size S"></div>
     </div>
+    <div class="form-row single" style="margin-bottom:12px;">
+      <div class="field" style="position:relative">
+        <label>Link to wishlist group <span style="font-weight:400;font-size:10px">(optional)</span></label>
+        <input type="text" id="cSlotGroup" placeholder="e.g. White Linen Pants" oninput="showCapsuleGroupAC('cSlotGroup','cSlotGroupAC')" autocomplete="off">
+        <div class="autocomplete" id="cSlotGroupAC" style="display:none"></div>
+      </div>
+    </div>
     <div id="cSlotImgZone" class="image-zone" style="margin-bottom:14px" onclick="document.getElementById('cSlotFileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleCSlotDrop(event)">
       <div id="cSlotImgPlaceholder" class="image-zone-placeholder">
         <div style="font-size:24px;margin-bottom:4px;">📸</div>
@@ -2166,6 +2188,13 @@ function openEditSlotModal(seasonId, ctxId, catId, slotId) {
     <div class="form-row single">
       <div class="field"><label>Notes</label><input type="text" id="cSlotNote" value="${slot.note || ''}" placeholder="e.g. From Zara, size S"></div>
     </div>
+    <div class="form-row single" style="margin-bottom:12px;">
+      <div class="field" style="position:relative">
+        <label>Link to wishlist group <span style="font-weight:400;font-size:10px">(optional)</span></label>
+        <input type="text" id="cSlotGroup" value="${slot.linkedGroup || ''}" placeholder="e.g. White Linen Pants" oninput="showCapsuleGroupAC('cSlotGroup','cSlotGroupAC')" autocomplete="off">
+        <div class="autocomplete" id="cSlotGroupAC" style="display:none"></div>
+      </div>
+    </div>
     <div id="cSlotImgZone" class="image-zone" style="margin-bottom:14px" onclick="document.getElementById('cSlotFileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleCSlotDrop(event)">
       <div id="cSlotImgPlaceholder" class="image-zone-placeholder" style="${slot.image ? 'display:none' : ''}">
         <div style="font-size:24px;margin-bottom:4px;">📸</div>
@@ -2183,7 +2212,54 @@ function openEditSlotModal(seasonId, ctxId, catId, slotId) {
   window._cSlotStatus = slot.status || 'looking';
 }
 
-function setCSlotStatus(s) {
+function viewLinkedOptions(group) {
+  const linkedItems = items.filter(i => !i.purchased && i.group === group);
+  if (!linkedItems.length) { toast('No wishlist items in this group'); return; }
+  const html = `
+    <h2>Options for "${group}"</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:4px;max-height:65vh;overflow-y:auto;">
+      ${linkedItems.sort((a,b) => parsePriceNum(a.price)-parsePriceNum(b.price)).map(item => {
+        const favicon = item.url ? `https://www.google.com/s2/favicons?domain=${getDomain(item.url)}&sz=32` : '';
+        const emoji = EMOJIS[item.category||''] || '🛍️';
+        return `
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:white;">
+          ${item.image
+            ? `<img src="${item.image}" style="width:100%;height:140px;object-fit:cover">`
+            : `<div style="width:100%;height:140px;background:linear-gradient(135deg,var(--cream),var(--accent-light));display:flex;align-items:center;justify-content:center;font-size:32px">${emoji}</div>`}
+          <div style="padding:10px 12px">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+              ${favicon ? `<img src="${favicon}" style="width:14px;height:14px;border-radius:2px">` : ''}
+              <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">${item.site || ''}</span>
+            </div>
+            <div style="font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.3">${item.name}</div>
+            <div style="font-size:15px;font-weight:600">${item.price || '—'}</div>
+            ${item.color ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${item.color}</div>` : ''}
+            ${item.notes ? `<div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:6px;border-top:1px solid var(--border);padding-top:6px">${item.notes}</div>` : ''}
+            ${item.url ? `<a href="${item.url}" target="_blank" onclick="event.stopPropagation()" style="display:block;margin-top:8px;font-size:11px;color:var(--accent);text-decoration:none;font-weight:500">View on site →</a>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="form-footer" style="margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeCapsuleModal()">Close</button>
+    </div>`;
+  showCapsuleModal(html);
+}
+
+function getCapsuleGroupSuggestions(val) {
+  return [...new Set(items.map(i => i.group).filter(Boolean))]
+    .filter(g => g.toLowerCase().includes(val.toLowerCase()) && val.length > 0);
+}
+
+function showCapsuleGroupAC(inputId, acId) {
+  const val = document.getElementById(inputId)?.value || '';
+  const ac = document.getElementById(acId);
+  if (!ac) return;
+  const matches = getCapsuleGroupSuggestions(val);
+  if (!matches.length) { ac.style.display='none'; return; }
+  ac.style.display='block';
+  ac.innerHTML = matches.map(g => `<div class="autocomplete-item" onclick="document.getElementById('${inputId}').value='${g}';document.getElementById('${acId}').style.display='none'">${g}</div>`).join('');
+}
   window._cSlotStatus = s;
   document.getElementById('cStatusLooking').className = 'priority-opt' + (s === 'looking' ? ' sel-maybe' : '');
   document.getElementById('cStatusOwned').className = 'priority-opt' + (s === 'owned' ? ' sel-maybe' : '');
@@ -2226,6 +2302,7 @@ function submitAddSlot(seasonId, ctxId, catId) {
     title,
     status: window._cSlotStatus || 'looking',
     note: document.getElementById('cSlotNote').value.trim(),
+    linkedGroup: document.getElementById('cSlotGroup')?.value.trim() || null,
     image: imgEl.src && imgEl.style.display !== 'none' ? imgEl.src : null,
   });
   saveCapsule(); closeCapsuleModal(); renderCapsule();
@@ -2241,6 +2318,7 @@ function submitEditSlot(seasonId, ctxId, catId, slotId) {
     title: document.getElementById('cSlotTitle').value.trim(),
     status: window._cSlotStatus,
     note: document.getElementById('cSlotNote').value.trim(),
+    linkedGroup: document.getElementById('cSlotGroup')?.value.trim() || null,
     image: imgEl.src && imgEl.style.display !== 'none' ? imgEl.src : null,
   };
   saveCapsule(); closeCapsuleModal(); renderCapsule();
@@ -2286,9 +2364,46 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const itemsCol = db.collection('items');
 
-// ── IMAGE UPLOAD (local only — no cloud storage) ──
+// ── CLOUDINARY IMAGE UPLOAD ──
+const CLOUDINARY_CLOUD = 'db1mu0r6g';
+
 async function uploadImageToStorage(base64DataUrl, path) {
-  return base64DataUrl; // keep locally, no cloud upload
+  const uploadPreset = getCloudinaryPreset();
+  if (!uploadPreset) return base64DataUrl; // fall back to local if no preset
+
+  try {
+    const formData = new FormData();
+    formData.append('file', base64DataUrl);
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', 'wishlist');
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.secure_url) return data.secure_url;
+    return base64DataUrl;
+  } catch(e) {
+    console.error('Cloudinary upload error:', e);
+    return base64DataUrl;
+  }
+}
+
+function getCloudinaryPreset() { return localStorage.getItem('wishlist_cloudinary_preset') || ''; }
+function saveCloudinaryPreset() {
+  const preset = document.getElementById('cloudinaryPresetInput')?.value.trim();
+  if (!preset) { toast('Please enter your upload preset'); return; }
+  localStorage.setItem('wishlist_cloudinary_preset', preset);
+  showCloudinaryStatus();
+  toast('Cloudinary preset saved ✓');
+}
+function showCloudinaryStatus() {
+  const el = document.getElementById('cloudinaryStatus');
+  if (!el) return;
+  const preset = getCloudinaryPreset();
+  el.innerHTML = preset ? `✓ Connected — preset: ${preset}` : 'Not connected yet';
+  el.style.color = preset ? 'var(--maybe)' : 'var(--muted)';
 }
 
 // Listen for real-time updates
@@ -2402,6 +2517,7 @@ async function pickThis(id) {
 init();
 showApiKeyStatus();
 showScreenshotKeyStatus();
+showCloudinaryStatus();
 startSync();
 </script>
 
